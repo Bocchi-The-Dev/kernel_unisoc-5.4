@@ -26,7 +26,7 @@ jobs:
       - name: Show available defconfigs (debug step)
         run: |
           ls arch/arm64/configs/ | grep -i ums9230 || ls arch/arm64/configs/
-
+          
       - name: Build kernel
         run: |
           export PATH="$GITHUB_WORKSPACE/toolchain/bin:$PATH"
@@ -36,7 +36,7 @@ jobs:
           export CROSS_COMPILE_ARM32=arm-linux-gnueabi-
           export CC=clang
           make O=out ARCH=arm64 x669_defconfig
-          make -j$(nproc) O=out ARCH=arm64 CC=clang 2>&1 | tee build.log
+          make -j$(nproc) O=out ARCH=arm64 CC=clang HOSTCC=gcc HOSTLD=ld 2>&1 | tee build.log
 
       - name: Upload build log
         if: always()
