@@ -36,7 +36,8 @@ jobs:
           export CROSS_COMPILE_ARM32=arm-linux-gnueabi-
           export CC=clang
           make O=out ARCH=arm64 x669_defconfig
-          make -j$(nproc) O=out ARCH=arm64 CC=clang HOSTCC=gcc HOSTLD=ld 2>&1 | tee build.log
+          # Force the host linker to the system ld to avoid using the cross-toolchain ld
+          make -j$(nproc) O=out ARCH=arm64 CC=clang HOSTCC=gcc HOSTLD=/usr/bin/ld 2>&1 | tee build.log
 
       - name: Upload build log
         if: always()
