@@ -1,1 +1,53 @@
+name: Build Kernel
 
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Checkout kernel source
+        uses: actions/checkout@v4
+        with:
+          ref: 20251210
+
+      - name: Install build dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y git make flex bison bc libssl-dev \
+            python3 device-tree-compiler libncurses-dev ccache \
+            build-essential libelf-dev
+
+      - name: Download Proton Clang 12
+        run: |
+          git clone --depth=1 https://github.com/kdrag0n/proton-clang.git toolchain
+
+      - name: Show available defconfigs (debug step)
+        run: |
+          ls arch/arm64/configs/ | grep -i ums9230 || ls arch/arm64/configs/
+
+      - name: Build kernel
+        run: |
+          export PATH="$GITHUB_WORKSPACE/toolchain/bin:$PATH"
+          export ARCH=arm64
+          export SUBARCH=arm64
+          export CROSS_COMPILE=aarch64-linux-gnu-
+          export CROSS_COMPILE_ARM32=arm-linux-gnueabi-
+          export CC=clang
+          make O=out ARCH=arm64 x669_defconfig
+          make -j$(nproc) O=out ARCH=arm64 CC=clang 2>&1 | tee build.log
+
+      - name: Upload build log
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-log
+          path: build.log
+
+      - name: Upload kernel Image
+        if: success()
+        uses: actions/upload-artifact@v4
+        with:
+          name: kernel-Image
+          path: out/arch/arm64/boot/Image*
