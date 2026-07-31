@@ -5,7 +5,7 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     steps:
       - name: Checkout kernel source
         uses: actions/checkout@v4
@@ -17,7 +17,7 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y git make flex bison bc libssl-dev \
             python3 device-tree-compiler libncurses-dev ccache \
-            build-essential libelf-dev
+            build-essential libelf-dev gcc-13 gcc-13-aarch64-linux-gnu
 
       - name: Download Proton Clang 12
         run: |
